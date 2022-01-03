@@ -1,0 +1,165 @@
+vlan create vlan 20,999
+vlan create vlan 4094
+traffic-services queuing queue-map set rcos-map Default-RCOS rcos 1 queue 1
+traffic-services queuing queue-map set rcos-map Default-RCOS rcos 2 queue 2
+traffic-services queuing queue-map set rcos-map Default-RCOS rcos 3 queue 3
+traffic-services queuing queue-map set rcos-map Default-RCOS rcos 4 queue 4
+traffic-services queuing queue-map set rcos-map Default-RCOS rcos 5 queue 5
+traffic-services queuing queue-map set rcos-map Default-RCOS rcos 6 queue 6
+traffic-services queuing queue-map set rcos-map Default-RCOS rcos 7 queue 7
+traffic-services cos-mapping resolved-cos-map set cos-map DefaultFcosRcos dot1dpri-cos 1,7 dot1dpri-dei 0 r-cos 0 r-color green
+traffic-services cos-mapping resolved-cos-map set cos-map DefaultFcosRcos dot1dpri-cos 1,7 dot1dpri-dei 1 r-cos 0 r-color green
+traffic-services cos-mapping resolved-cos-map set cos-map DefaultFcosRcos dot1dpri-cos 2 dot1dpri-dei 0 r-cos 3 r-color green
+traffic-services cos-mapping resolved-cos-map set cos-map DefaultFcosRcos dot1dpri-cos 2 dot1dpri-dei 1 r-cos 3 r-color green
+traffic-services cos-mapping resolved-cos-map set cos-map DefaultFcosRcos dot1dpri-cos 6 dot1dpri-dei 0 r-cos 5 r-color green
+traffic-services cos-mapping resolved-cos-map set cos-map DefaultFcosRcos dot1dpri-cos 6 dot1dpri-dei 1 r-cos 5 r-color green
+traffic-services cos-mapping frame-cos-map set cos-map DefaultRcosFcos r-cos 0 r-color yellow dot1dpri-cos 0 dot1dpri-dei 1
+traffic-services cos-mapping frame-cos-map set cos-map DefaultRcosFcos r-cos 1 r-color yellow dot1dpri-cos 1 dot1dpri-dei 1
+traffic-services cos-mapping frame-cos-map set cos-map DefaultRcosFcos r-cos 2 r-color yellow dot1dpri-cos 2 dot1dpri-dei 1
+traffic-services cos-mapping frame-cos-map set cos-map DefaultRcosFcos r-cos 3 r-color yellow dot1dpri-cos 3 dot1dpri-dei 1
+traffic-services cos-mapping frame-cos-map set cos-map DefaultRcosFcos r-cos 4 r-color yellow dot1dpri-cos 4 dot1dpri-dei 1
+traffic-services cos-mapping frame-cos-map set cos-map DefaultRcosFcos r-cos 5 r-color yellow dot1dpri-cos 5 dot1dpri-dei 1
+traffic-services cos-mapping frame-cos-map set cos-map DefaultRcosFcos r-cos 6 r-color yellow dot1dpri-cos 6 dot1dpri-dei 1
+traffic-services cos-mapping frame-cos-map set cos-map DefaultRcosFcos r-cos 7 r-color yellow dot1dpri-cos 7 dot1dpri-dei 1
+system set host-name USAMO15360264CCN390001
+interface remote set vlan 4094
+interface remote set ip 166.35.153.73/25
+interface local set ip 10.111.40.155/24
+interface set gateway 166.35.153.126
+dns-client set domain-name vzbi.com
+dns-client add server 166.37.162.103
+dns-client add server 166.37.218.90
+dns-client add server 166.37.130.87
+ntp client add server 166.37.130.87
+ntp client add server 166.37.162.103
+ntp client add server 166.37.218.90
+syslog create collector 166.38.80.251 severity emergency,alert,critical,error,warning,notice,info facility 23
+syslog create collector 166.37.158.195 severity emergency,alert,critical,error,warning,notice,info facility 23
+syslog create collector 166.37.227.190 severity emergency,alert,critical,error,warning,notice,info facility 23
+syslog create collector 166.50.139.206 severity emergency,alert,critical,error,warning,notice,info facility 23
+port set port 1 speed hundred auto-neg off mode rj45
+port set port 1 vs-l2-transform i-stamp:push,e-match-pop:stamp max-frame-size 9100 description E3093340
+port disable port 2
+port set port 9 max-frame-size 9200 description NNI:ID|USAMO15360264CCN390001_NNI_33171018
+vlan add vlan 4094 port 9
+vlan add vlan 200,300 port 6
+vlan remove vlan 127 port 9
+vlan rename vlan 20 name VLAN-6192813.1
+port set port 1 vs-ingress-filter on
+! vs_EPL
+virtual-circuit ethernet create vc vc_EPL vlan 200
+virtual-switch ethernet create vs vs_EPL encap-fixed-dot1dpri 5 vc vc_EPL description "EPL Service"
+virtual-switch ethernet add vs vs_EPL port 1 encap-cos-policy fixed encap-fixed-dot1dpri 5
+port set port 1 untagged-data-vs vs_EPL untagged-ctrl-vs vs_EPL
+! vs_EVPL
+virtual-circuit ethernet create vc vc_EVPL vlan 300
+virtual-switch ethernet create vs vs_EVPL vc vc_EVPL description "EVPL Service"
+virtual-switch ethernet add vs vs_EVPL port 2 vlan 10
+virtual-switch ethernet add vs vs_EVPL port 2 vlan 20 encap-cos-policy fixed encap-fixed-dot1dpri 2
+virtual-switch ethernet add vs vs_EVPL port 2 vlan 30 encap-cos-policy fixed encap-fixed-dot1dpri 3
+
+traffic-services queuing egress-port-queue-group set port 1 scheduler-algorithm weighted-deficit-round-robin
+traffic-services queuing egress-port-queue-group set queue 0 port 1 eir 100000 scheduler-weight 5
+traffic-services queuing egress-port-queue-group set queue 1 port 1 eir 100000 scheduler-weight 2
+traffic-services queuing egress-port-queue-group set queue 2 port 1 eir 100000 scheduler-weight 2
+traffic-services queuing egress-port-queue-group set queue 3 port 1 eir 100000 scheduler-weight 10
+traffic-services queuing egress-port-queue-group set queue 4 port 1 eir 100000 scheduler-weight 15
+traffic-services queuing egress-port-queue-group set queue 5 port 1 eir 100000
+traffic-services queuing egress-port-queue-group set queue 6 port 1 eir 100000 scheduler-weight 0
+traffic-services queuing egress-port-queue-group set queue 7 port 1 eir 100000
+traffic-services queuing egress-port-queue-group set port 2 scheduler-algorithm weighted-deficit-round-robin
+traffic-services queuing egress-port-queue-group set queue 0 port 2 scheduler-weight 5
+traffic-services queuing egress-port-queue-group set queue 1 port 2 scheduler-weight 2
+traffic-services queuing egress-port-queue-group set queue 2 port 2 scheduler-weight 2
+traffic-services queuing egress-port-queue-group set queue 3 port 2 scheduler-weight 10
+traffic-services queuing egress-port-queue-group set queue 4 port 2 scheduler-weight 15
+traffic-services queuing egress-port-queue-group set queue 6 port 2 scheduler-weight 0
+traffic-services queuing egress-port-queue-group set port 9 scheduler-algorithm weighted-deficit-round-robin
+traffic-services queuing egress-port-queue-group set queue 0 port 9 scheduler-weight 5
+traffic-services queuing egress-port-queue-group set queue 1 port 9 scheduler-weight 2
+traffic-services queuing egress-port-queue-group set queue 2 port 9 scheduler-weight 2
+traffic-services queuing egress-port-queue-group set queue 3 port 9 scheduler-weight 10
+traffic-services queuing egress-port-queue-group set queue 4 port 9 scheduler-weight 15
+traffic-services queuing egress-port-queue-group set queue 6 port 9 scheduler-weight 0
+aggregation set port 1 agg-mode manual
+aggregation set port 2 agg-mode manual
+aggregation set port 9 agg-mode manual
+aggregation disable
+l2-cft set mode mef-ce2
+l2-cft create profile filterLinkProtocols
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol cisco-cdp untagged-disposition forward
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol cisco-dtp untagged-disposition forward
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol cisco-pagp untagged-disposition forward
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol cisco-udld untagged-disposition forward
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol cisco-vtp untagged-disposition forward
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol cisco-pvst untagged-disposition forward
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol cisco-stp-uplink-fast untagged-disposition forward
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol vlan-bridge untagged-disposition discard tagged-disposition discard
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol xstp untagged-disposition forward
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol lacp untagged-disposition discard tagged-disposition discard
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol lacp-marker untagged-disposition discard tagged-disposition discard
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol oam untagged-disposition discard tagged-disposition discard
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol lldp untagged-disposition forward
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol 802.1x untagged-disposition discard tagged-disposition discard
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol esmc untagged-disposition discard tagged-disposition discard
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol elmi untagged-disposition discard tagged-disposition discard
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol ptp-peer-delay untagged-disposition discard tagged-disposition discard
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol gmrp untagged-disposition forward
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol gvrp untagged-disposition forward
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol bridge-rsvd-0B0F untagged-disposition forward
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol bridge-rsvd-0C0D untagged-disposition forward
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol mef-ce2-bridge-block untagged-disposition discard tagged-disposition discard
+l2-cft protocol add profile filterLinkProtocols ctrl-protocol garp-block untagged-disposition forward
+l2-cft set port 1 profile filterLinkProtocols
+l2-cft enable port 1
+traffic-profiling set meter-provisioning eir
+traffic-profiling set port 1 mode advanced
+traffic-profiling standard-profile create port 1 profile 1 name TP-20 cir 6144 eir 512 cbs 29952 ebs 14976 untagged
+traffic-profiling enable port 1
+traffic-profiling enable
+lldp  set port 1-3 mode disable
+rstp disable
+chassis dying-gasp enable
+chassis dying-gasp set informs on
+benchmark reflector set vendor-type other
+benchmark reflector set mac-validation off
+vlan remove vlan 1 port 9
+cfm enable
+cfm set vs-automatic-meps off
+cfm md create md vzMdFormatNoneL0 level 0 md-name-format none
+cfm md create md vzMdFormatNoneL1 level 1 md-name-format none
+cfm md create md vzMdFormatNoneL2 level 2 md-name-format none
+cfm md create md vzMdFormatNoneL3 md-name-format none
+cfm md create md vzMdFormatNoneL4 level 4 md-name-format none
+cfm md create md vzMdFormatNoneL5 level 5 md-name-format none
+cfm md create md vzMdFormatNoneL6 level 6 md-name-format none
+cfm md create md vzMdFormatNoneL7 level 7 md-name-format none
+cfm profile bins create delay Vz-CPA-Delay-bin
+cfm profile bins set delay Vz-CPA-Delay-bin bin-index 1 threshold 5000
+cfm profile bins set delay Vz-CPA-Delay-bin bin-index 2 threshold 10000
+cfm profile bins set delay Vz-CPA-Delay-bin bin-index 3 threshold 15000
+cfm profile bins set delay Vz-CPA-Delay-bin bin-index 4 threshold 20000
+cfm profile bins set delay Vz-CPA-Delay-bin bin-index 5 threshold 25000
+cfm profile bins set delay Vz-CPA-Delay-bin bin-index 6 threshold 30000
+cfm profile bins set delay Vz-CPA-Delay-bin bin-index 7 threshold 50000
+cfm profile bins set delay Vz-CPA-Delay-bin bin-index 8 threshold 100000
+cfm profile bins set delay Vz-CPA-Delay-bin bin-index 9 threshold 250000
+cfm profile bins set delay Vz-CPA-Delay-bin bin-index 10 threshold 500000
+cfm profile bins create jitter Vz-CPA-Jitter-bin
+cfm profile bins set jitter Vz-CPA-Jitter-bin bin-index 1 threshold 1000
+cfm profile bins set jitter Vz-CPA-Jitter-bin bin-index 2 threshold 2000
+cfm profile bins set jitter Vz-CPA-Jitter-bin bin-index 3 threshold 3000
+cfm profile bins set jitter Vz-CPA-Jitter-bin bin-index 4 threshold 4000
+cfm profile bins set jitter Vz-CPA-Jitter-bin bin-index 5 threshold 5000
+cfm profile bins set jitter Vz-CPA-Jitter-bin bin-index 6 threshold 6000
+cfm profile bins set jitter Vz-CPA-Jitter-bin bin-index 7 threshold 7000
+cfm profile bins set jitter Vz-CPA-Jitter-bin bin-index 8 threshold 8000
+cfm profile bins set jitter Vz-CPA-Jitter-bin bin-index 9 threshold 10000
+cfm profile bins set jitter Vz-CPA-Jitter-bin bin-index 10 threshold 20000
+system shell set global-more off
+system shell set global-inactivity-timeout 15
+system server scp enable
+system server sftp enable
+ssh server enable
+dhcp client disable
+dhcpv6 client disable

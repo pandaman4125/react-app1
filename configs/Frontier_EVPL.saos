@@ -1,0 +1,20 @@
+!!!UNI Port Configuration
+port set port 1 description \"\"
+port set port 1 max-frame-size 9216
+port enable port 1
+!!!NNI Port Configuration
+
+port set port 6 description \"\"
+port set port 6 max-frame-size 9216
+port enable port 6
+!!!LLDP Configuration
+lldp set port 1 mode disable
+lldp set port 6 mode tx-rx
+!!!Service Configuration
+vlan create vlan 200
+vlan add vlan 200 port 6
+
+port set port 1 acceptable-frame-type all
+virtual-circuit ethernet create vc vc200 vlan 200 statistics on
+virtual-switch ethernet create vs EVPL_200 vc vc200 encap-cos-policy fixed encap-fixed-dot1dpri 5
+virtual-switch ethernet add vs EVPL_200 port 1 vlan 100 statistics on
