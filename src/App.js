@@ -33,7 +33,7 @@ function App() {
                 let columns = []
                 if (tables[k] != null) {
                     for (var d in tables[k][0]) {
-                        columns.push(<Column field={d} header={d}> 
+                        columns.push(<Column field={d} header={d}>
                         </Column>)
                     }
                 }
@@ -47,16 +47,15 @@ function App() {
         return result;
     }
     return (
-        <div className="datatable-crud-demo surface-card p-4 border-round shadow-2">
+        <div className="p-grid p-justify-center">
             <Toast ref={toast} />
-
-            <div className="text-3xl text-800 font-bold mb-4">SAOS 6x to SAOS 10x Converter</div>
-            <InputTextarea rows={10} cols={150} onChange={(e) => setInputConfig(e.target.value)} />
-            <br />
-            <Button label="Convert" className="p-button-rounded" onClick={click_convert} />
-            <br />
-            <InputTextarea rows={10} cols={150} value={xml} />
-            <br />
+            <Button className="p-col-12 p-button-lg p-button-secondary" disabled>SAOS 6x to SAOS 10x Converter</Button>
+            <div className="p-align-center">
+                <InputTextarea rows={10} cols={110} onChange={(e) => setInputConfig(e.target.value)} />
+                <Button label="Convert" className="p-button-rounded p-button-lg p-align-center" onClick={click_convert} />
+                <InputTextarea rows={10} cols={110} value={xml} />
+            </div>
+            <Button className="p-col-12 p-button-lg p-button-secondary" disabled>Tables</Button>
             <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
                 {tabBuilder(tables)}
             </TabView>
