@@ -21,16 +21,27 @@ function App() {
     const click_convert = () => {
         postData({ "config": inputConfig })
             .then((value) => {
-                setXML(value.xml) ?
-                    console.log(value) :
-                    setTables(value.tables);
+                setXML(value.xml)
+                setTables(value.tables)
             });
     }
+
     function tabBuilder(tables) {
         let result = [];
         for (var k in tables) {
             if (tables.hasOwnProperty(k)) {
-                result.push(<TabPanel header={k}></TabPanel>)
+                let columns = []
+                if (tables[k] != null) {
+                    for (var d in tables[k][0]) {
+                        columns.push(<Column field={d} header={d}> 
+                        </Column>)
+                    }
+                }
+                result.push(<TabPanel header={k}>
+                    <DataTable value={tables[k]}>
+                        {columns}
+                    </DataTable>
+                </TabPanel>)
             }
         }
         return result;
